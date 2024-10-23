@@ -5,6 +5,7 @@ package diago
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 
 	"github.com/emiago/sipgo"
@@ -108,4 +109,31 @@ func (d *DialogClientSession) handleReInvite(req *sip.Request, tx sip.ServerTran
 
 func (d *DialogClientSession) readSIPInfoDTMF(req *sip.Request, tx sip.ServerTransaction) {
 	tx.Respond(sip.NewResponseFromRequest(req, sip.StatusNotAcceptable, "Not Acceptable", nil))
+}
+
+func (d *DialogClientSession) handleReInviteWithEngine(req *sip.Request, tx sip.ServerTransaction) {
+	if err := d.ReadRequest(req, tx); err != nil {
+		tx.Respond(sip.NewResponseFromRequest(req, sip.StatusBadRequest, err.Error(), nil))
+		return
+	}
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.lastInvite = req
+
+	id, err := sip.UASReadRequestDialogID(req)
+	if err == nil {
+		_, err := DialogsClientCache.DialogLoad(context.TODO(), id)
+
+		if err != nil {
+			if errors.Is(err, sipgo.ErrDialogDoesNotExists) {
+				tx.Respond(sip.NewResponseFromRequest(req, sip.StatusCallTransactionDoesNotExists, err.Error(), nil))
+				return
+			}
+			tx.Respond(sip.NewResponseFromRequest(req, sip.StatusBadRequest, err.Error(), nil))
+			return
+		}
+	}
+
+	tx.Respond(sip.NewSDPResponseFromRequest(req, d.InviteResponse.Body()))
 }

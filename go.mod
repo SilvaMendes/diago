@@ -3,10 +3,10 @@ module github.com/emiago/diago
 go 1.22.4
 
 require (
+	github.com/SilvaMendes/go-rtpengine v0.1.0
 	github.com/emiago/sipgo v0.24.2-0.20241009194434-f8762ab672dc
 	github.com/go-audio/riff v1.0.0
 	github.com/go-audio/wav v1.1.0
-	github.com/icholy/digest v0.1.22
 	github.com/pion/rtcp v1.2.14
 	github.com/pion/rtp v1.8.9
 	github.com/rs/zerolog v1.33.0
@@ -15,13 +15,17 @@ require (
 )
 
 require (
+	github.com/anacrolix/missinggo v1.3.0 // indirect
+	github.com/anacrolix/missinggo/v2 v2.7.3 // indirect
+	github.com/anacrolix/torrent v1.55.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-audio/audio v1.0.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.3.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
+	github.com/huandu/xstrings v1.3.2 // indirect
+	github.com/icholy/digest v0.1.22 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pion/randutil v0.1.0 // indirect

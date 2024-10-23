@@ -5,6 +5,7 @@ package diago
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync/atomic"
 	"time"
@@ -261,4 +262,31 @@ func (d *DialogServerSession) readSIPInfoDTMF(req *sip.Request, tx sip.ServerTra
 	// for {
 
 	// }
+}
+
+func (d *DialogServerSession) handleReInviteWithEngine(req *sip.Request, tx sip.ServerTransaction) {
+	if err := d.ReadRequest(req, tx); err != nil {
+		tx.Respond(sip.NewResponseFromRequest(req, sip.StatusBadRequest, err.Error(), nil))
+		return
+	}
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.lastInvite = req
+
+	id, err := sip.UASReadRequestDialogID(req)
+	if err == nil {
+		_, err := DialogsServerCache.DialogLoad(context.TODO(), id)
+
+		if err != nil {
+			if errors.Is(err, sipgo.ErrDialogDoesNotExists) {
+				tx.Respond(sip.NewResponseFromRequest(req, sip.StatusCallTransactionDoesNotExists, err.Error(), nil))
+				return
+			}
+			tx.Respond(sip.NewResponseFromRequest(req, sip.StatusBadRequest, err.Error(), nil))
+			return
+		}
+	}
+
+	tx.Respond(sip.NewSDPResponseFromRequest(req, d.InviteResponse.Body()))
 }
