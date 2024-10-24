@@ -22,32 +22,13 @@ type engineClient struct {
 	Domain string
 }
 
-func WithProto(proto string) EngineOption {
-	return func(e engineClient) {
-		e.Proto = proto
-	}
+// Construct
+func New() *RTP {
+	return &RTP{}
 }
 
-func WithIp(ip string) EngineOption {
-	return func(e engineClient) {
-		e.Ip = ip
-	}
-}
-
-func WithPort(port int) EngineOption {
-	return func(e engineClient) {
-		e.Port = port
-	}
-}
-
-func WithDomain(domain string) EngineOption {
-	return func(e engineClient) {
-		e.Domain = domain
-	}
-}
-
-// Create new rtpengine instance
-func NewEngine(opts ...EngineOption) *RTP {
+// Create new rtpengine instance client
+func EngineConect(opts ...EngineOption) *rtpengine.Client {
 	rtp := &RTP{}
 	for _, o := range opts {
 		o(rtp.conf)
@@ -75,7 +56,7 @@ func NewEngine(opts ...EngineOption) *RTP {
 		rtp.log.Warn().Msg("Domain and IP cannot be configured at the same time by default it will be the IP")
 	}
 
-	return rtp
+	return rtp.Client
 }
 
 // Profile to offer a UDP sdp protocol
@@ -239,12 +220,20 @@ func (r *RTP) RTP_WSS_Offer(params *rtpengine.ParamsOptString) *rtpengine.Reques
 	}
 }
 
+// Delete an rtpengine session and free up resources
 func (r *RTP) RTP_Delete(params *rtpengine.ParamsOptString) *rtpengine.RequestRtp {
 	return &rtpengine.RequestRtp{
 		Command:              string(rtpengine.Delete),
 		ParamsOptString:      params,
 		ParamsOptInt:         &rtpengine.ParamsOptInt{},
 		ParamsOptStringArray: &rtpengine.ParamsOptStringArray{},
+	}
+}
+
+// Handshaker after connection with client
+func (r *RTP) EngineHandshake() *rtpengine.RequestRtp {
+	return &rtpengine.RequestRtp{
+		Command: string(rtpengine.Ping),
 	}
 }
 
